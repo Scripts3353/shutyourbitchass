@@ -19,23 +19,24 @@
     .ev{background:#111;padding:15px;border-radius:6px;margin-top:20px;border:1px solid #0f0}
     .ev label{display:block;margin:6px 0}
     .panic{color:#f00;font-size:11px}
+    .note{color:#f80;font-size:12px;text-align:center;margin:10px 0}
   </style>
 </head>
 <body>
   <h1>Really unbl0ck3d</h1>
-  <p style="text-align:center;color:#666;font-size:14px">Unblock Games — No Logo, No Bullshit</p>
+  <p class="note"><b>TIKTOK WORKS!</b> Use the button below or type tiktok.com</p>
 
   <div class="grid">
+    <div class="card"><b>TikTok</b><button onclick="go('https://tiktok.com')">OPEN</button></div>
     <div class="card"><b>Krunker</b><button onclick="go('https://krunker.io')">PLAY</button></div>
     <div class="card"><b>Shell Shockers</b><button onclick="go('https://shellshock.io')">PLAY</button></div>
     <div class="card"><b>1v1.LOL</b><button onclick="go('https://1v1.lol')">PLAY</button></div>
     <div class="card"><b>Roblox</b><button onclick="go('https://roblox.com')">PLAY</button></div>
-    <div class="card"><b>Diep.io</b><button onclick="go('https://diep.io')">PLAY</button></div>
     <div class="card"><b>Custom</b><button onclick="document.getElementById('u').focus()">URL</button></div>
   </div>
 
   <div class="in">
-    <input id="u" placeholder="https://blocked.com" />
+    <input id="u" placeholder="https://tiktok.com or any site" />
     <button onclick="go(document.getElementById('u').value)">GO</button>
   </div>
   <iframe id="f" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
@@ -49,27 +50,27 @@
 
   <script>
     document.addEventListener('keydown', e => e.key === 'Escape' && (location.href = 'https://khanacademy.org'));
-    
-const proxies = [
-  'https://corsproxy.io/?',
-  'https://api.codetabs.com/v1/proxy?quest=',
-  'https://cors.bridged.cc/',
-  'https://proxy.tubeless.pages.dev/'
-];
 
-let current = 0;
+    // TIKTOK + GENERAL PROXY
+    function go(url) {
+      if (!url) return;
+      if (!url.startsWith('http')) url = 'https://' + url;
 
-function go(url) {
-  if (!url.startsWith('http')) url = 'https://' + url;
-  const iframe = document.getElementById('f');
-  const tryLoad = () => {
-    iframe.src = proxies[current] + encodeURIComponent(url);
-    current = (current + 1) % proxies.length;
-  };
-  iframe.onload = () => console.log('Loaded with', proxies[current-1]);
-  iframe.onerror = tryLoad;
-  tryLoad();
-}
+      const iframe = document.getElementById('f');
+      let proxyUrl;
+
+      // TIKTOK SPECIAL PROXY
+      if (url.includes('tiktok.com')) {
+        proxyUrl = 'https://tikproxy.tik.fail/' + url;
+      }
+      // EVERYTHING ELSE
+      else {
+        proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+      }
+
+      iframe.src = proxyUrl;
+      document.getElementById('u').value = url;
+    }
   </script>
 </body>
 </html>
