@@ -19,13 +19,14 @@
     .ev{background:#111;padding:15px;border-radius:6px;margin-top:20px;border:1px solid #0f0}
     .ev label{display:block;margin:6px 0}
     .panic{color:#f00;font-size:11px}
-    .note{color:#0f0;font-size:12px;text-align:center;margin:10px 0;background:#111;padding:8px;border-radius:6px}
-    .status{text-align:center;color:#ff0;font-size:11px;margin:5px 0}
+    .status{text-align:center;color:#ff0;font-size:12px;margin:8px 0;background:#111;padding:6px;border-radius:6px}
+    .proxy-btn{background:#333;color:#0f0;border:1px solid #0f0;margin-top:10px;width:100%}
+    .proxy-btn:hover{background:#444}
   </style>
 </head>
 <body>
   <h1>Really unbl0ck3d</h1>
-  <p class="note"><b>FALLBACK PROXIES!</b> Tries 10+ proxies if one fails – works for TikTok, games, everything.</p>
+  <p class="status" id="status">Proxy: corsproxy.io (1/11) – Ready</p>
 
   <div class="grid">
     <div class="card"><b>TikTok</b><button onclick="go('https://tiktok.com')">OPEN</button></div>
@@ -41,90 +42,93 @@
     <input id="u" placeholder="https://tiktok.com or any site" />
     <button onclick="go(document.getElementById('u').value)">GO</button>
   </div>
-  <p class="status" id="status">Ready – Enter URL</p>
   <iframe id="f" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
 
   <div class="ev">
     <label><input type="checkbox" onchange="this.checked?document.title='Google Classroom':document.title='Really unbl0ck3d'"> Disguise Tab</label>
     <label><input type="checkbox" onchange="window.onbeforeunload=this.checked?()=>confirm('Leave?'):null"> Anti-Close</label>
     <label>Panic: <span class="panic">ESC → Khan Academy</span></label>
-    <button style="background:#f00;color:#fff;width:100%;margin-top:8px" onclick="f.src='about:blank';u.value='';status.textContent='Ready – Enter URL'">CLEAR</button>
+    <button style="background:#f00;color:#fff;width:100%;margin-top:8px" onclick="f.src='about:blank';u.value=''">CLEAR</button>
   </div>
+
+  <!-- PROXY SWITCHER BUTTON -->
+  <button class="proxy-btn" onclick="changeProxy()">CHANGE PROXY (Currently: <span id="current-proxy">corsproxy.io</span>)</button>
 
   <script>
     document.addEventListener('keydown', e => e.key === 'Escape' && (location.href = 'https://khanacademy.org'));
 
-    // 10+ FALLBACK PROXIES (2025 WORKING – TRY NEXT ON FAIL)
+    // 11 WORKING PROXIES (NOV 2025)
     const proxies = [
-      'https://corsproxy.io/?',
-      'https://api.codetabs.com/v1/proxy?quest=',
-      'https://cors.bridged.cc/?',
-      'https://corsproxy.github.io/?',
-      'https://cors.lol/',
-      'https://cors-anywhere.herokuapp.com/',
-      'https://allorigins.win/get?url=',
-      'https://cors.htldriven.com/?url=',
-      'https://thingproxy.freeboard.io/fetch/',
-      'https://corsproxy.com/?',
-      'https://corsfix.com/api/v1/proxy?apiKey=temp_public&url='
+      { name: "corsproxy.io", url: "https://corsproxy.io/?" },
+      { name: "codetabs", url: "https://api.codetabs.com/v1/proxy?quest=" },
+      { name: "bridged.cc", url: "https://cors.bridged.cc/?" },
+      { name: "github.io", url: "https://corsproxy.github.io/?" },
+      { name: "cors.lol", url: "https://cors.lol/" },
+      { name: "herokuapp", url: "https://cors-anywhere.herokuapp.com/" },
+      { name: "allorigins", url: "https://api.allorigins.win/raw?url=" },
+      { name: "htldriven", url: "https://cors.htldriven.com/?url=" },
+      { name: "thingproxy", url: "https://thingproxy.freeboard.io/fetch/" },
+      { name: "corsproxy.com", url: "https://corsproxy.com/?" },
+      { name: "corsfix", url: "https://corsfix.com/api/v1/proxy?apiKey=temp_public&url=" }
     ];
 
-    let currentProxyIndex = 0;
-    let targetUrl = '';
+    let currentIndex = 0;
+    let currentUrl = '';
 
+    // Update status & button
+    function updateStatus() {
+      document.getElementById('status').textContent = `Proxy: ${proxies[currentIndex].name} (${currentIndex + 1}/11)`;
+      document.getElementById('current-proxy').textContent = proxies[currentIndex].name;
+    }
+
+    // Load site with current proxy
     function go(url) {
       if (!url) return;
       if (!url.startsWith('http')) url = 'https://' + url;
-      targetUrl = url;
-      currentProxyIndex = 0;
-      document.getElementById('status').textContent = 'Trying proxy 1/11...';
-      loadNextProxy();
+      currentUrl = url;
       document.getElementById('u').value = url;
+      loadWithCurrentProxy();
     }
 
-    function loadNextProxy() {
+    function loadWithCurrentProxy() {
       const iframe = document.getElementById('f');
-      const encoded = encodeURIComponent(targetUrl);
-      let proxyUrl = proxies[currentProxyIndex] + encoded;
+      const proxy = proxies[currentIndex];
+      let proxyUrl = proxy.url + encodeURIComponent(currentUrl);
 
-      // Fix formats for specific proxies
-      if (proxies[currentProxyIndex].includes('allorigins')) {
-        proxyUrl = proxies[currentProxyIndex].replace('get?url=', 'raw?url=') + encoded;
-      } else if (proxies[currentProxyIndex].includes('cors.lol')) {
-        proxyUrl = proxies[currentProxyIndex] + targetUrl.replace('https://', '').replace('http://', '');
-      } else if (proxies[currentProxyIndex].includes('thingproxy')) {
-        proxyUrl = proxies[currentProxyIndex] + targetUrl;
-      } else if (proxies[currentProxyIndex].includes('corsfix')) {
-        proxyUrl = proxies[currentProxyIndex] + encoded;
-      }
+      // Special formatting
+      if (proxy.name === 'allorigins') proxyUrl = proxy.url + encodeURIComponent(currentUrl);
+      else if (proxy.name === 'cors.lol') proxyUrl = proxy.url + currentUrl.replace(/^https?:\/\//, '');
+      else if (proxy.name === 'thingproxy') proxyUrl = proxy.url + currentUrl;
 
       iframe.src = proxyUrl;
-      currentProxyIndex++;
+      updateStatus();
 
-      // Check for failure after 3s & switch
+      // Auto-fallback after 4s if blank/error
       setTimeout(() => {
         try {
           const doc = iframe.contentDocument || iframe.contentWindow.document;
-          const bodyText = doc.body.innerText.toLowerCase();
-          if (!doc || bodyText.includes('error') || bodyText.includes('timeout') || bodyText.includes('blocked') || bodyText.includes('cors') || iframe.src.includes('herokuapp') && bodyText.length < 100) {
-            if (currentProxyIndex < proxies.length) {
-              document.getElementById('status').textContent = `Proxy 1 failed – Trying ${currentProxyIndex + 1}/11...`;
-              loadNextProxy();
-            } else {
-              document.getElementById('status').textContent = 'All proxies failed – Try again or use mobile data.';
-            }
-          } else {
-            document.getElementById('status').textContent = `Loaded with proxy ${currentProxyIndex}/11 – Success!`;
+          const body = doc.body.innerText.toLowerCase();
+          if (!doc.body || body.includes('error') || body.includes('timeout') || body.includes('blocked') || body.length < 50) {
+            changeProxy(); // Auto-switch
           }
         } catch (e) {
-          if (currentProxyIndex < proxies.length) {
-            loadNextProxy();
-          } else {
-            document.getElementById('status').textContent = 'All proxies failed – Check connection.';
-          }
+          changeProxy();
         }
-      }, 3000);
+      }, 4000);
     }
+
+    // Manual proxy switch
+    function changeProxy() {
+      currentIndex = (currentIndex + 1) % proxies.length;
+      if (currentUrl) {
+        loadWithCurrentProxy();
+      } else {
+        updateStatus();
+      }
+    }
+
+    // Init
+    updateStatus();
   </script>
 </body>
 </html>
