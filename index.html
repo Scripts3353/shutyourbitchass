@@ -49,7 +49,7 @@
 
   <script>
     document.addEventListener('keydown', e => e.key === 'Escape' && (location.href = 'https://khanacademy.org'));
-    const proxy = 'https://api.allorigins.win/raw?url=';
+    const proxy = 'https://corsproxy.github.io/?';
     function go(url) {
       if (!url) return;
       if (!url.startsWith('http')) url = 'https://' + url;
