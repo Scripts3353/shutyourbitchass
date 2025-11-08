@@ -50,16 +50,26 @@
   <script>
     document.addEventListener('keydown', e => e.key === 'Escape' && (location.href = 'https://khanacademy.org'));
     
-    // CLEAN, NO-BRANDING PROXY
-    const proxy = 'https://corsproxy.io/?';
-    
-    function go(url) {
-      if (!url) return;
-      if (!url.startsWith('http')) url = 'https://' + url;
-      const iframe = document.getElementById('f');
-      iframe.src = proxy + encodeURIComponent(url);
-      document.getElementById('u').value = url;
-    }
+const proxies = [
+  'https://corsproxy.io/?',
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://cors.bridged.cc/',
+  'https://proxy.tubeless.pages.dev/'
+];
+
+let current = 0;
+
+function go(url) {
+  if (!url.startsWith('http')) url = 'https://' + url;
+  const iframe = document.getElementById('f');
+  const tryLoad = () => {
+    iframe.src = proxies[current] + encodeURIComponent(url);
+    current = (current + 1) % proxies.length;
+  };
+  iframe.onload = () => console.log('Loaded with', proxies[current-1]);
+  iframe.onerror = tryLoad;
+  tryLoad();
+}
   </script>
 </body>
 </html>
